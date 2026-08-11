@@ -1,0 +1,20 @@
+# --- Secrets & local env (never commit) ---
+.env
+*.tfvars
+!*.tfvars.example
+*.pem
+*_ed25519
+*_ed25519.pub
+*.key
+
+# --- Terraform ---
+# NOTE: .terraform.lock.hcl is intentionally NOT ignored — commit it to pin provider versions.
+.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# --- OS / editor cruft ---
+.DS_Store
+*.swp
