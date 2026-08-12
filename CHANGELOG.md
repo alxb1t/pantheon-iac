@@ -34,6 +34,22 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
 - `cloud-init/vendor-data.yml`: cloud-init vendor-data that installs `qemu-guest-agent` and
   unlocks the cloud-init user so key-based SSH works on Alpine (its OpenSSH is built without
   PAM and refuses `!`-locked accounts even with a valid key) (Phase 2).
+- Gitadel VM declared in Terraform (`terraform/gitadel-vm.tf`): clones the Alpine template
+  via `bpg` with 1 vCPU, memory ballooning (512–1024 MB), a 20 GB disk, a static IP, and
+  cloud-init identity (user + SSH key); parameterized in `variables.tf`, with real values in
+  the gitignored `terraform.tfvars` (Phase 3).
+- `docs/terraform-proxmox-access.md`: documents the least-privilege Proxmox role, API-only
+  user, and token setup for Terraform (Phase 3).
+- `docs/ip-addressing.md`: how to choose a safe static IP — subnet, DHCP pool, and an
+  `arping` free-address check (Phase 3).
+- `docs/alpine-cloud-init-notes.md`: Alpine-on-Proxmox cloud-init gotchas & fixes (serial
+  console, guest agent, no-PAM SSH lock, static-IP DNS, `doas`) + debugging techniques
+  (Phase 3).
+
+### Fixed
+- Alpine VMs with a static IP had no DNS — cloud-init configures the interface but does not
+  write `/etc/resolv.conf` (normally the DHCP client does). `vendor-data.yml` now writes it
+  early via `bootcmd`, so `apk` (guest-agent install) works on first boot (Phase 3).
 
 ### Security
 - Proxmox access for Terraform uses a dedicated least-privilege role (`TerraformProv`)

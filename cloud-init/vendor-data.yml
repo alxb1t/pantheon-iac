@@ -2,24 +2,27 @@
 # vendor-data.yml — cloud-init "vendor-data" channel for the Pantheon Alpine template.
 #
 # Proxmox auto-generates each clone's USER-data (user, SSH key, hostname, IP). This
-# vendor-data is MERGED with it (not a replacement), so it applies to every clone while
-# leaving per-clone identity intact. It does two things:
+# vendor-data is MERGED with it and applies to every clone. It does three things:
 #
-#   1. Installs qemu-guest-agent so Proxmox can read the VM's IP and shut it down cleanly.
-#   2. Unlocks the cloud-init user so key-based SSH works. Alpine's OpenSSH is built
-#      WITHOUT PAM, so it refuses a '!'-locked account even with a valid key. Proxmox
-#      leaves the account locked when no password is set (our key-only model), so we
-#      flip '!' -> '*' in /etc/shadow. '*' still blocks password login (and
-#      PasswordAuthentication is off anyway) — it only clears the lock flag.
+#   1. Writes /etc/resolv.conf early (bootcmd). Alpine + a STATIC IP configures the
+#      interface and route but does NOT populate resolv.conf (with DHCP, udhcpc does it);
+#      without DNS, apk can't reach the mirrors.
+#   2. Installs qemu-guest-agent so Proxmox can read the VM's IP and shut it down cleanly.
+#   3. Unlocks the cloud-init user so key-based SSH works (Alpine's OpenSSH has no PAM and
+#      refuses '!'-locked accounts even with a valid key).
 
 package_update: true
 packages:
   - qemu-guest-agent
 
+bootcmd:
+  # runs before the package stage → apk can resolve mirror hostnames
+  - echo "nameserver 1.1.1.1" > /etc/resolv.conf
+  - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+
 runcmd:
   # enable + start the guest agent (OpenRC — Alpine has no systemd)
   - rc-update add qemu-guest-agent default
   - rc-service qemu-guest-agent start
-  # unlock every human user (UID 1000-65533) so pubkey SSH is allowed; selected by UID
-  # because vendor-data can't know the per-clone username in advance
+  # unlock every human user (UID 1000-65533) so pubkey SSH is allowed
   - 'awk -F: ''$3>=1000 && $3<65534{print $1}'' /etc/passwd | while read u; do sed -i "s/^$u:!:/$u:*:/" /etc/shadow; done'

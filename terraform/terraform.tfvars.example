@@ -2,3 +2,7 @@
 proxmox_endpoint  = "https://<HOST_IP>:8006/"
 proxmox_api_token = "terraform@pve!terraform-token=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
 # proxmox_insecure defaults to true — only set it to override
+
+pve_node   = "your-proxmox-node-name"
+vm_ip      = "192.168.1.NN"   # pick one OUTSIDE your DHCP pool
+vm_gateway = "192.168.1.1"
