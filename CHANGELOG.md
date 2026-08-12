@@ -22,5 +22,15 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
   and secrets/topology discipline (Phase 0).
 - `CHANGELOG.md` following Keep a Changelog (Phase 0).
 - `LICENSE`: MIT (Phase 0).
+- Terraform ↔ Proxmox authentication: `bpg/proxmox` provider configured with a
+  least-privilege, API-only token (`terraform@pve`, not root), plus a read-only node
+  data source that verifies connectivity without changing infrastructure (Phase 1).
+- `terraform/` inputs and reproducibility: `providers.tf`/`variables.tf`, a committed
+  `terraform.tfvars.example` template, and a pinned `.terraform.lock.hcl` (Phase 1).
+
+### Security
+- Proxmox access for Terraform uses a dedicated least-privilege role (`TerraformProv`)
+  and a scoped API token rather than the root account; real endpoint/token live only in
+  a gitignored `terraform.tfvars` (Phase 1).
 
 [Unreleased]: https://github.com/alxb1t/pantheon-iac
