@@ -40,6 +40,7 @@ resource "proxmox_virtual_environment_vm" "gitadel" {
   # cloud-init: per-VM identity (Proxmox generates user-data from these).
   initialization {
     datastore_id = var.vm_datastore
+    upgrade      = false
 
     dns {
       servers = var.vm_dns_servers

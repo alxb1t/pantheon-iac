@@ -1,0 +1,24 @@
+---
+# gitadel-deploy — the SEAM: check out the vendor-neutral Gitadel repo and run it.
+
+- name: Install git
+  community.general.apk:
+    name: git
+    state: present
+
+- name: Check out the Gitadel repo onto the VM
+  ansible.builtin.git:
+    repo: "{{ gitadel_repo_url }}"
+    dest: "{{ gitadel_dest }}"
+    version: main
+
+- name: Template the Forgejo .env (topology; real secrets would come from the vault)
+  ansible.builtin.template:
+    src: env.j2
+    dest: "{{ gitadel_dest }}/.env"
+    mode: "0640"
+
+- name: Start Forgejo with Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ gitadel_dest }}"
+    state: present

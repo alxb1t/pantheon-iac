@@ -45,6 +45,20 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
 - `docs/alpine-cloud-init-notes.md`: Alpine-on-Proxmox cloud-init gotchas & fixes (serial
   console, guest agent, no-PAM SSH lock, static-IP DNS, `doas`) + debugging techniques
   (Phase 3).
+- Ansible project (`ansible/`): `ansible.cfg`, `site.yml`, and a gitignored `inventory.ini`
+  (committed `inventory.example.ini`), using `doas` for privilege escalation (Phase 4).
+- Ansible base role `docker-host`: installs Docker + the Compose plugin (Alpine
+  `community`), loads Docker's netfilter kernel modules, enables the OpenRC service, and
+  adds the login user to the `docker` group (Phase 4).
+- Ansible deploy seam `gitadel-deploy`: checks out the vendor-neutral Gitadel repo onto the
+  VM, templates its `.env`, and runs `docker compose up -d` (Forgejo on SQLite) (Phase 4).
+- cloud-init: `doas` privilege escalation for the cloud user — install `doas`, add human
+  users to `wheel`, `permit nopass :wheel` — so Ansible can `become` (Phase 4).
+
+### Changed
+- `terraform/gitadel-vm.tf`: set `initialization.upgrade = false` to skip the first-boot
+  package upgrade, which on Alpine swapped the kernel out from under the running one and
+  broke Docker's iptables/netfilter setup (Phase 4).
 
 ### Fixed
 - Alpine VMs with a static IP had no DNS — cloud-init configures the interface but does not

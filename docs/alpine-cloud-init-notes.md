@@ -76,9 +76,15 @@ Proxmox presents cloud-init as a NoCloud CD-ROM (`ide2`, label `cidata`).
   escalate — which blocks Ansible's privilege escalation.
 - **Cause:** Alpine ships `doas` instead of `sudo`, and the image's default doas config
   doesn't apply to the cloud-init user.
-- **Fix:** _(added in Phase 4)_ grant the cloud user escalation — e.g. add it to the
-  `wheel` group and write a `doas` rule (`permit persist :wheel`) via vendor-data or the
-  Ansible base role. This section will be finalized when Phase 4 lands.
+- **Fix:** grant escalation in `vendor-data.yml` (root, on first boot — Ansible can't do
+  this itself: it needs root to grant root). Install `doas`, add human users to the `wheel`
+  group, and write a passwordless rule:
+  ```sh
+  awk -F: '$3>=1000 && $3<65534{print $1}' /etc/passwd | while read u; do adduser "$u" wheel; done
+  echo "permit nopass :wheel" > /etc/doas.conf
+  ```
+  Ansible then escalates with `become_method: doas`. (`permit nopass :wheel` is the `doas`
+  equivalent of `NOPASSWD` sudo — fine for a homelab VM.)
 
 ---
 

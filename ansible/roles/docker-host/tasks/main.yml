@@ -1,0 +1,41 @@
+---
+# docker-host — install Docker + Compose and run it as an OpenRC service (Alpine).
+
+- name: Install Docker, the Compose plugin, and shadow (usermod)
+  community.general.apk:
+    name:
+      - docker
+      - docker-cli-compose
+      - shadow
+    state: present
+    update_cache: true
+
+- name: Ensure Docker's netfilter modules load at boot
+  ansible.builtin.copy:
+    dest: /etc/modules-load.d/docker.conf
+    content: |
+      nf_tables
+      nf_nat
+      br_netfilter
+    mode: "0644"
+
+- name: Load the netfilter modules now
+  community.general.modprobe:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - nf_tables
+    - nf_nat
+    - br_netfilter
+
+- name: Enable and start the Docker service
+  ansible.builtin.service:
+    name: docker
+    enabled: true
+    state: started
+
+- name: Add the login user to the docker group
+  ansible.builtin.user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: true

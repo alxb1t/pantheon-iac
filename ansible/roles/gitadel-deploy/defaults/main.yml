@@ -1,0 +1,5 @@
+---
+gitadel_repo_url: "https://github.com/alxb1t/gitadel.git"
+gitadel_dest: "/opt/gitadel"
+forgejo_version: "16"
+forgejo_ssh_port: 2222

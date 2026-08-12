@@ -1,0 +1,7 @@
+---
+- name: Configure the Gitadel VM as a Docker host
+  hosts: forge
+  become: true
+  roles:
+    - docker-host
+    - gitadel-deploy
