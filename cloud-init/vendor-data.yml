@@ -1,0 +1,25 @@
+#cloud-config
+# vendor-data.yml — cloud-init "vendor-data" channel for the Pantheon Alpine template.
+#
+# Proxmox auto-generates each clone's USER-data (user, SSH key, hostname, IP). This
+# vendor-data is MERGED with it (not a replacement), so it applies to every clone while
+# leaving per-clone identity intact. It does two things:
+#
+#   1. Installs qemu-guest-agent so Proxmox can read the VM's IP and shut it down cleanly.
+#   2. Unlocks the cloud-init user so key-based SSH works. Alpine's OpenSSH is built
+#      WITHOUT PAM, so it refuses a '!'-locked account even with a valid key. Proxmox
+#      leaves the account locked when no password is set (our key-only model), so we
+#      flip '!' -> '*' in /etc/shadow. '*' still blocks password login (and
+#      PasswordAuthentication is off anyway) — it only clears the lock flag.
+
+package_update: true
+packages:
+  - qemu-guest-agent
+
+runcmd:
+  # enable + start the guest agent (OpenRC — Alpine has no systemd)
+  - rc-update add qemu-guest-agent default
+  - rc-service qemu-guest-agent start
+  # unlock every human user (UID 1000-65533) so pubkey SSH is allowed; selected by UID
+  # because vendor-data can't know the per-clone username in advance
+  - 'awk -F: ''$3>=1000 && $3<65534{print $1}'' /etc/passwd | while read u; do sed -i "s/^$u:!:/$u:*:/" /etc/shadow; done'

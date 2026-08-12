@@ -27,6 +27,13 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
   data source that verifies connectivity without changing infrastructure (Phase 1).
 - `terraform/` inputs and reproducibility: `providers.tf`/`variables.tf`, a committed
   `terraform.tfvars.example` template, and a pinned `.terraform.lock.hcl` (Phase 1).
+- Alpine cloud-init VM template on Proxmox: `cloud-init/build-alpine-template.sh` builds a
+  reusable, generic Docker-host template — downloads + sha512-verifies the Alpine cloud
+  image, creates a virtio VM with a serial console and cloud-init drive, imports the disk,
+  wires in vendor-data, and converts it to a Proxmox template (Phase 2).
+- `cloud-init/vendor-data.yml`: cloud-init vendor-data that installs `qemu-guest-agent` and
+  unlocks the cloud-init user so key-based SSH works on Alpine (its OpenSSH is built without
+  PAM and refuses `!`-locked accounts even with a valid key) (Phase 2).
 
 ### Security
 - Proxmox access for Terraform uses a dedicated least-privilege role (`TerraformProv`)
