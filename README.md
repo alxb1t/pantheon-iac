@@ -39,6 +39,29 @@ creates it → Ansible configures it. Terraform *provisions* infrastructure; Ans
 *configures* it; cloud-init *bootstraps* it.
 
 
+## Quickstart
+
+Prerequisites: a Proxmox VE host (see [`docs/host-runbook.md`](docs/host-runbook.md)) with a
+least-privilege API token ([`docs/terraform-proxmox-access.md`](docs/terraform-proxmox-access.md)),
+and Terraform + Ansible on your workstation.
+
+```bash
+# 1. Build the reusable Alpine cloud-init template on the host (once)
+scp cloud-init/build-alpine-template.sh cloud-init/vendor-data.yml <host>:/tmp/
+ssh <host> 'sudo sh /tmp/build-alpine-template.sh'
+
+# 2. Provision the VM with Terraform
+cd terraform
+cp terraform.tfvars.example terraform.tfvars   # fill in endpoint, token, node, IP
+terraform init && terraform apply
+
+# 3. Turn it into a Docker host and deploy the forge with Ansible
+cd ../ansible
+cp inventory.example.ini inventory.ini         # fill in the VM IP
+ansible-playbook site.yml
+```
+
+
 ## Repository layout:
 
 ```
@@ -65,9 +88,12 @@ pantheon-iac/
 
 ## Status
 
-**v0.1 — in progress**, built phase-by-phase (repo skeleton → Proxmox auth → Alpine
-template → declare VM → Ansible deploy → backups & reproducibility → publish). Local
-Terraform state; LAN-only; remote access deferred.
+**v0.1 — complete.** Built phase-by-phase: repo skeleton → Proxmox API auth → Alpine
+cloud-init template → Terraform-provisioned VM → Ansible Docker host + Forgejo → backups &
+reproducibility. The first tenant — a self-hosted [Forgejo](https://forgejo.org/) forge —
+runs on an Alpine VM provisioned **end-to-end from code**, with nightly Proxmox backups and
+a proven `destroy → apply → ansible` rebuild. Local Terraform state; LAN-only. TLS / reverse
+proxy and remote access are v0.2.
 
 
 ## Prerequisites

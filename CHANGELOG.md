@@ -10,6 +10,12 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-13
+
+Homelab-as-code v0.1: a self-hosted Forgejo forge provisioned end-to-end from code on a
+Proxmox host — Alpine cloud-init template → Terraform VM → Ansible Docker host + Compose →
+backups & proven reproducibility.
+
 ### Added
 - Repository scaffolding: `CLAUDE.md` (loads project context from the notes vault),
   `.env.example` template, and `.gitignore` covering Terraform state/vars, `.env`,
@@ -75,4 +81,5 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
   and a scoped API token rather than the root account; real endpoint/token live only in
   a gitignored `terraform.tfvars` (Phase 1).
 
-[Unreleased]: https://github.com/alxb1t/pantheon-iac
+[Unreleased]: https://github.com/alxb1t/pantheon-iac/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/alxb1t/pantheon-iac/releases/tag/v0.1.0
