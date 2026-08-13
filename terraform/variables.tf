@@ -61,7 +61,7 @@ variable "vm_bridge" {
 variable "vm_disk_size" {
   description = "VM disk size in GB (grown from the template's small base disk)."
   type        = number
-  default     = 20
+  default     = 4
 }
 
 variable "vm_memory" {

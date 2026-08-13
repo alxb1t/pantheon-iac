@@ -54,11 +54,16 @@ Pantheon v0.1 is built phase-by-phase; each completed phase adds entries under
   VM, templates its `.env`, and runs `docker compose up -d` (Forgejo on SQLite) (Phase 4).
 - cloud-init: `doas` privilege escalation for the cloud user — install `doas`, add human
   users to `wheel`, `permit nopass :wheel` — so Ansible can `become` (Phase 4).
+- `docs/backups.md`: VM backup/restore runbook — Proxmox `vzdump` + a nightly `pvesh` job,
+  the `qmrestore` restore drill (with the IP-conflict and Terraform-state caveats), and the
+  `forgejo dump` off-site note (Phase 5).
 
 ### Changed
 - `terraform/gitadel-vm.tf`: set `initialization.upgrade = false` to skip the first-boot
   package upgrade, which on Alpine swapped the kernel out from under the running one and
   broke Docker's iptables/netfilter setup (Phase 4).
+- Reduced the Gitadel VM disk from 20 GB to 4 GB (`vm_disk_size`) — git storage is tiny, and
+  growing a disk later is trivial while shrinking isn't (Phase 5).
 
 ### Fixed
 - Alpine VMs with a static IP had no DNS — cloud-init configures the interface but does not
